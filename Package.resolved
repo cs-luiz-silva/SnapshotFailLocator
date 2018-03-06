@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Console",
+        "repositoryURL": "https://bitbucket.org/cs-luiz-silva/console.git",
+        "state": {
+          "branch": null,
+          "revision": "bae04df99e56117fea0649b5749a5dd1a71c302b",
+          "version": "0.1.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
