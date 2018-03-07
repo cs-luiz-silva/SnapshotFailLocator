@@ -52,7 +52,10 @@ func main() throws {
     }
     
     let formatter = DateFormatter()
-    formatter.dateFormat = "dd/MM HH:mm:ss"
+    formatter.dateStyle = .short
+    formatter.timeStyle = .short
+    formatter.locale = Locale.current
+    formatter.doesRelativeDateFormatting = true
     
     let provider = AnyConsoleDataProvider(count: files.count, header: "Snapshot files found - most recent first:") { index -> String in
         let file = files[index]
