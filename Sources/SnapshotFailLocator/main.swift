@@ -53,6 +53,7 @@ func main() throws {
     
     if files.count == 0 {
         console.printLine("No snapshot files found.")
+        return
     }
     
     let formatter = DateFormatter()
