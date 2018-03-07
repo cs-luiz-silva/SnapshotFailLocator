@@ -29,7 +29,11 @@ func main() throws {
         return
     }
     
+    #if swift(>=4.1)
     let lazyFilesEnum = filesEnumerator.lazy.compactMap { $0 as? URL }
+    #else
+    let lazyFilesEnum = filesEnumerator.lazy.flatMap { $0 as? URL }
+    #endif
     
     var files: [SnapshotFile] = []
     
