@@ -18,8 +18,7 @@ func main() throws {
     
     guard let filesEnumerator =
         fileManager.enumerator(at: URL(fileURLWithPath: devicesPath),
-                               includingPropertiesForKeys: [.creationDateKey,
-                                                            .contentModificationDateKey],
+                               includingPropertiesForKeys: [.contentModificationDateKey],
                                options: .skipsHiddenFiles,
                                errorHandler: { (url, error) in
                                 console.printLine("Error navigating \(url.relativePath): \(error)")
