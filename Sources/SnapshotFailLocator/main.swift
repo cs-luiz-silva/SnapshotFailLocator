@@ -61,15 +61,18 @@ func main() throws {
     formatter.locale = Locale.current
     formatter.doesRelativeDateFormatting = true
     
-    let provider = AnyConsoleDataProvider(count: files.count, header: "Snapshot files found - most recent first:") { index -> String in
+    let provider = AnyConsoleDataProvider(count: files.count, header: "Snapshot files found - most recent first:") { index -> [String] in
         let file = files[index]
         
         let fileName = file.path.lastPathComponent
-        let dirPath = file.path.pathComponents.dropLast().suffix(1).joined(separator: "/")
+        let dirPath = file.path.pathComponents.dropLast().suffix(1).joined(separator: "/").terminalColorize(ConsoleColor.green)
         
-        let str = "\(formatter.string(from: file.changeDate)) - \(dirPath)/\(fileName)"
+        var columns: [String] = []
         
-        return str
+        columns.append(formatter.string(from: file.changeDate).terminalColorize(ConsoleColor.magenta))
+        columns.append("\(dirPath)/\(fileName)")
+        
+        return columns
     }
     
     let config = Pages.PageDisplayConfiguration(
