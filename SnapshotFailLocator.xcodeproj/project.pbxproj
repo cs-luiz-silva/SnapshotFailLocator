@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		7EAA79F020404F9300AE52EF /* Path.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EAA79EF20404F9300AE52EF /* Path.swift */; };
+		7EC9EF5A20BEFADA004B6F93 /* SnapshotPathEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC9EF5920BEFADA004B6F93 /* SnapshotPathEnumerator.swift */; };
+		7EC9EF5C20BF0648004B6F93 /* SnapshotFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC9EF5B20BF0648004B6F93 /* SnapshotFile.swift */; };
 		OBJ_29 /* Console+Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* Console+Command.swift */; };
 		OBJ_30 /* Console+Paging.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* Console+Paging.swift */; };
 		OBJ_31 /* Console.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* Console.swift */; };
@@ -32,6 +34,8 @@
 
 /* Begin PBXFileReference section */
 		7EAA79EF20404F9300AE52EF /* Path.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Path.swift; sourceTree = "<group>"; };
+		7EC9EF5920BEFADA004B6F93 /* SnapshotPathEnumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotPathEnumerator.swift; sourceTree = "<group>"; };
+		7EC9EF5B20BF0648004B6F93 /* SnapshotFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotFile.swift; sourceTree = "<group>"; };
 		"Console::Console::Product" /* Console.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Console.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		OBJ_14 /* Console+Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Console+Command.swift"; sourceTree = "<group>"; };
 		OBJ_15 /* Console+Paging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Console+Paging.swift"; sourceTree = "<group>"; };
@@ -42,7 +46,7 @@
 		OBJ_20 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/luizsilva/Documents/Local Projects/SnapshotFailLocator/.build/checkouts/console.git--8585489906604320222/Package.swift"; sourceTree = "<group>"; };
 		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		OBJ_9 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		"SnapshotFailLocator::SnapshotFailLocator::Product" /* SnapshotFailLocator */ = {isa = PBXFileReference; lastKnownFileType = text; path = SnapshotFailLocator; sourceTree = BUILT_PRODUCTS_DIR; };
+		"SnapshotFailLocator::SnapshotFailLocator::Product" /* SnapshotFailLocator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = SnapshotFailLocator; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,7 +115,7 @@
 			name = Products;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -120,7 +124,6 @@
 				OBJ_11 /* Dependencies */,
 				OBJ_21 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_7 /* Sources */ = {
@@ -136,6 +139,8 @@
 			children = (
 				7EAA79EF20404F9300AE52EF /* Path.swift */,
 				OBJ_9 /* main.swift */,
+				7EC9EF5920BEFADA004B6F93 /* SnapshotPathEnumerator.swift */,
+				7EC9EF5B20BF0648004B6F93 /* SnapshotFile.swift */,
 			);
 			name = SnapshotFailLocator;
 			path = Sources/SnapshotFailLocator;
@@ -220,7 +225,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_21 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -260,6 +265,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
+				7EC9EF5C20BF0648004B6F93 /* SnapshotFile.swift in Sources */,
+				7EC9EF5A20BEFADA004B6F93 /* SnapshotPathEnumerator.swift in Sources */,
 				OBJ_47 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -398,7 +405,7 @@
 				INFOPLIST_FILE = SnapshotFailLocator.xcodeproj/SnapshotFailLocator_Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
 				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xfrontend -warn-long-function-bodies=100 -Xfrontend -warn-long-expression-type-checking=50";
 				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
 				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
 				SWIFT_VERSION = 4.0;
@@ -417,7 +424,7 @@
 				INFOPLIST_FILE = SnapshotFailLocator.xcodeproj/SnapshotFailLocator_Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
 				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited) -Xfrontend -warn-long-function-bodies=100 -Xfrontend -warn-long-expression-type-checking=50";
 				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
 				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
 				SWIFT_VERSION = 4.0;

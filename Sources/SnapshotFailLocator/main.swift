@@ -2,53 +2,15 @@ import Foundation
 import Cocoa
 import Console
 
-struct SnapshotFile {
-    var path: URL
-    var changeDate: Date
-}
-
 func main() throws {
     let console = Console()
-    let fileManager = FileManager.default
     
     console.printLine("Locating files...")
 
-    
-    let devicesPath = ("~/Library/Developer/CoreSimulator/Devices/" as NSString).standardizingPath
-    
-    guard let filesEnumerator =
-        fileManager.enumerator(at: URL(fileURLWithPath: devicesPath),
-                               includingPropertiesForKeys: [.contentModificationDateKey],
-                               options: .skipsHiddenFiles,
-                               errorHandler: { (url, error) in
-                                console.printLine("Error navigating \(url.relativePath): \(error)")
-                                return false
-        }) else {
-        console.printLine("Error fetching enumerator for path \(devicesPath)!")
-        return
-    }
-    
-    #if swift(>=4.1)
-    let lazyFilesEnum = filesEnumerator.lazy.compactMap { $0 as? URL }
-    #else
-    let lazyFilesEnum = filesEnumerator.lazy.flatMap { $0 as? URL }
-    #endif
-    
-    var files: [SnapshotFile] = []
-    
-    for file in lazyFilesEnum {
-        if !file.path.contains("failed_") || file.pathExtension != "png" {
-            continue
+    let files =
+        SnapshotPathEnumerator.enumerateSnapshotFiles().sorted {
+            $0.changeDate > $1.changeDate
         }
-        let vals = try file.resourceValues(forKeys: [.contentModificationDateKey])
-        guard let date = vals.contentModificationDate else {
-            continue
-        }
-        
-        files.append(SnapshotFile(path: file, changeDate: date))
-    }
-    
-    files = files.sorted { $0.changeDate > $1.changeDate }
     
     if files.count == 0 {
         console.printLine("No snapshot files found.")
