@@ -255,8 +255,8 @@ class MainMenu {
 
             \("<number>".terminalColorize(.magenta))
             = Open snapshot file
-                Insert a \("number".terminalColorize(.blue)) from the list to open
-                the containing folder for that snapshot file on Finder.
+                Insert a \("number".terminalColorize(.blue)) from the list to open the containing
+                folder for that snapshot file on Finder.
 
             \("refresh".terminalColorize(.magenta)), \("r".terminalColorize(.magenta))
             = Refresh files
@@ -264,19 +264,20 @@ class MainMenu {
 
             \("filter [<pattern>]".terminalColorize(.magenta)), \("f [<pattern>]".terminalColorize(.magenta))
             = Filter files
-                Uses a given <pattern> to filter files being displayed.
+                Uses a given \("<pattern>".terminalColorize(.magenta)) to filter files being displayed.
                 Inserting an empty pattern clears filters back to default again.
                 Refreshing or erasing files clears filters.
                 Erase command ignores filtering (see \("<eraseall>".terminalColorize(.magenta))).
                 Filtering is case-insensitive.
-                Supports wildcards in paths, e.g. \("'MyView*'".terminalColorize(.blue)) matches \("'MyView'".terminalColorize(.blue)), \("'MyViewController'".terminalColorize(.blue)), \("'MyViewModel'".terminalColorize(.blue)), etc.
+                Supports wildcards in paths, e.g. \("'MyView*'".terminalColorize(.blue)) matches \("'MyView'".terminalColorize(.blue)),
+                    \("'MyViewController'".terminalColorize(.blue)), \("'MyViewModel'".terminalColorize(.blue)), etc.
 
             \("eraseall".terminalColorize(.magenta)), \("e".terminalColorize(.magenta))
             = Delete files
                 \("Deletes".terminalColorize(.red)) all snapshot files on disk.
                 Prompts for confirmation beforehands.
                 Note: Does a lookup on disk prior to deletion, removing all snapshot
-                      files found, even if not currently listed.
+                      files found while ignoring any currently active filtering.
 
             \("help".terminalColorize(.magenta)), \("h".terminalColorize(.magenta))
             Displays this help prompt.
