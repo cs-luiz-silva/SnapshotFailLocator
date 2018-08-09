@@ -2,7 +2,6 @@ import Foundation
 import Cocoa
 
 class SnapshotPathEnumerator {
-    
     static func enumerateSnapshotFiles() -> AnySequence<SnapshotFile> {
         let snapshots =
             DeviceIterator().lazy.flatMap { iterator in
@@ -11,7 +10,6 @@ class SnapshotPathEnumerator {
         
         return AnySequence<SnapshotFile>(snapshots)
     }
-    
 }
 
 struct DeviceIterator: Sequence, IteratorProtocol {
@@ -87,14 +85,25 @@ struct ApplicationSnaphotIterator: Sequence, IteratorProtocol {
                     continue
                 }
                 
-                return SnapshotFile(path: file, changeDate: date)
+                // Math `reference_` and `diff_` files which are also saved on
+                // the same path as failed images
+                let referencePath
+                    = file.path.replacingOccurrences(of: "failed_", with: "reference_")
+                let diffPath
+                    = file.path.replacingOccurrences(of: "failed_", with: "diff_")
+                
+                let folder = (file.path as NSString).deletingLastPathComponent
+                
+                return SnapshotFile(failurePath: file,
+                                    referencePath: URL(fileURLWithPath: referencePath),
+                                    diffPath: URL(fileURLWithPath: diffPath),
+                                    folder: folder,
+                                    changeDate: date)
             } catch {
                 continue
             }
         }
         
         return nil
-        
     }
-    
 }
