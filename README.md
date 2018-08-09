@@ -55,6 +55,7 @@ Snapshot files found - most recent first:
 = Page 1 of 3
 Input page (0 or empty to close):
 Specify an entry number to open its containing folder
+Type help to see reference for available commands.
 > _
 ```
 
