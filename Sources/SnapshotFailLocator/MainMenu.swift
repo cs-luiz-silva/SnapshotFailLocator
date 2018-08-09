@@ -8,8 +8,18 @@ class MainMenu {
     var console: ConsoleClient
     var repository: SnapshotRepository
     
-    var files: [SnapshotFile] {
-        return repository.files
+    var filteredFiles: [SnapshotFile] = []
+    
+    /// If non-nil, specifies the currently active filter working on paths of
+    /// snapshot filenames.
+    var activeFilter: String? {
+        didSet {
+            if let activeFilter = activeFilter {
+                filteredFiles = filterFiles(in: repository, with: activeFilter)
+            } else {
+                filteredFiles = repository.files
+            }
+        }
     }
     
     init(console: ConsoleClient, repository: SnapshotRepository) {
@@ -20,19 +30,22 @@ class MainMenu {
     func run() {
         locateFiles()
         
-        let pages = makeSnapshotPages(from: files)
+        let pages = makeSnapshotPages(from: filteredFiles)
         showSnapshotFiles(in: pages)
     }
     
     func locateFiles() {
+        activeFilter = nil
+        
         console.printLine("Locating files...")
         repository.reloadFromDisk()
+        filteredFiles = repository.files
     }
     
     // MARK: Functionalities
     
     private func browseToSnapshot(index: Int) {
-        let file = files[index]
+        let file = filteredFiles[index]
         
         let folder = file.folder
         
@@ -65,6 +78,44 @@ class MainMenu {
         return true
     }
     
+    private func processFilter(in input: String) -> Pages.PagesCommandResult? {
+        let split =
+            input
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .components(separatedBy: " ")
+        
+        if split.count == 1 {
+            if !split[0].matches("filter", "f") {
+                return nil
+            }
+            
+            // One component only: User has input just `filter` or `f`
+            // Result: Clear filter
+            activeFilter = nil
+            
+            return .modifyList { pages in
+                self.showSnapshotFiles(in: pages)
+            }
+        }
+        
+        let filter = split.dropFirst().joined(separator: " ")
+        
+        if filter == activeFilter {
+            return .loop(nil)
+        }
+        
+        if filter.isEmpty {
+            // Empty string clears filters
+            activeFilter = nil
+        } else {
+            activeFilter = filter
+        }
+        
+        return .modifyList { pages in
+            self.showSnapshotFiles(in: pages)
+        }
+    }
+    
     // MARK: User input/CLI management
     
     private func processUserInputOnPages(_ input: String) -> Pages.PagesCommandResult {
@@ -77,7 +128,7 @@ class MainMenu {
         // Help
         if input.matches("help", "h") {
             console.clearScreen()
-            return .showMessageThenLoop(makeHelpString())
+            return .showMessageThenLoop(MainMenu.makeHelpString())
         }
         
         // Refresh
@@ -89,11 +140,18 @@ class MainMenu {
             }
         }
         
+        // Filter files
+        if input.hasPrefix("filter") || input.hasPrefix("f") {
+            if let result = processFilter(in: input) {
+                return result
+            }
+        }
+        
         // Erase all
         if input.matches("eraseall", "e") {
             if eraseAll() {
                 return .modifyList { pages in
-                    //self.locateFiles()
+                    self.locateFiles()
                     self.showSnapshotFiles(in: pages)
                 }
             }
@@ -106,23 +164,26 @@ class MainMenu {
             return .loop("Invalid entry index '\(input)': expected an entry index from above.".terminalColorize(.red))
         }
         
-        if files.isEmpty {
+        if filteredFiles.isEmpty {
             return .loop("No snapshot files are available. Type 'refresh' to reload from disk now.".terminalColorize(.red))
         }
         
-        if int < 1 || int > files.count {
-            return .loop("Invalid entry index \(int): must be between 1 and \(files.count).".terminalColorize(.red))
+        if int < 1 || int > filteredFiles.count {
+            return .loop("Invalid entry index \(int): must be between 1 and \(filteredFiles.count).".terminalColorize(.red))
         }
         
         let index = int - 1
         
         self.browseToSnapshot(index: index)
         
-        return .loop("Opening folder \(files[index].folder)...".terminalColorize(.magenta))
+        return .loop("Opening folder \(filteredFiles[index].folder)...".terminalColorize(.magenta))
     }
     
     private func showSnapshotFiles(in pages: Pages) {
-        let provider = makeSnapshotPagesProvider(from: files)
+        let provider =
+            MainMenu.makeSnapshotPagesProvider(from: filteredFiles,
+                                               activeFilter: activeFilter)
+        
         pages.displayPages(withProvider: provider)
     }
     
@@ -143,7 +204,7 @@ class MainMenu {
         return pages
     }
     
-    private func makeSnapshotPagesProvider(from files: [SnapshotFile]) -> AnyConsoleDataProvider<[String]> {
+    private static func makeSnapshotPagesProvider(from files: [SnapshotFile], activeFilter: String?) -> AnyConsoleDataProvider<[String]> {
         let formatter = DateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .short
@@ -151,9 +212,16 @@ class MainMenu {
         formatter.doesRelativeDateFormatting = true
         
         let count = files.isEmpty ? 1 : files.count
+        let header = "Snapshot files found - most recent first:"
         
-        let provider = AnyConsoleDataProvider(count: count, header: "Snapshot files found - most recent first:") { index -> [String] in
+        let provider = AnyConsoleDataProvider<[String]>(count: count, header: header) { index in
             if files.isEmpty {
+                if let activeFilter = activeFilter {
+                    return [
+                        "\("No snapshots found matching filter".terminalColorize(.red)) \(activeFilter.terminalColorize(.magenta))\(".".terminalColorize(.red))"
+                    ]
+                }
+                
                 return ["No snapshots available.".terminalColorize(.red)]
             }
             
@@ -177,7 +245,7 @@ class MainMenu {
         return provider
     }
     
-    private func makeHelpString() -> String {
+    private static func makeHelpString() -> String {
         return """
             Available commands and functionalities:
 
@@ -193,6 +261,15 @@ class MainMenu {
             \("refresh".terminalColorize(.magenta)), \("r".terminalColorize(.magenta))
             = Refresh files
                 Reloads snapshot files list by reloading the list from disk.
+
+            \("filter [<pattern>]".terminalColorize(.magenta)), \("f [<pattern>]".terminalColorize(.magenta))
+            = Filter files
+                Uses a given <pattern> to filter files being displayed.
+                Inserting an empty pattern clears filters back to default again.
+                Refreshing or erasing files clears filters.
+                Erase command ignores filtering (see \("<eraseall>".terminalColorize(.magenta))).
+                Filtering is case-insensitive.
+                Supports wildcards in paths, e.g. \("'MyView*'".terminalColorize(.blue)) matches \("'MyView'".terminalColorize(.blue)), \("'MyViewController'".terminalColorize(.blue)), \("'MyViewModel'".terminalColorize(.blue)), etc.
 
             \("eraseall".terminalColorize(.magenta)), \("e".terminalColorize(.magenta))
             = Delete files
