@@ -188,16 +188,7 @@ class MainMenu {
     }
     
     private func makeSnapshotPages(from files: [SnapshotFile]) -> Pages {
-        let prompt = """
-            Specify an entry number to open its containing folder
-            Type \("help".terminalColorize(.green)) to see reference for available commands.
-            """
-        
-        let config = Pages.PageDisplayConfiguration(
-            clearOnDisplay: true,
-            commandPrompt: prompt) { [weak self] str -> Pages.PagesCommandResult in
-                return self?.processUserInputOnPages(str) ?? .quit(nil)
-            }
+        let config = Pages.PageDisplayConfiguration(commandHandler: self)
         
         let pages = console.makePages(configuration: config)
         
@@ -284,6 +275,39 @@ class MainMenu {
 
             """
     }
+}
+
+extension MainMenu: PagesCommandHandler {
+    
+    var commandPrompt: String? {
+        
+        if let activeFilter = activeFilter {
+            
+            return """
+                \("Displaying entries matching".terminalColorize(.magenta)) \(activeFilter.terminalColorize(.blue))
+                Specify an entry number to open its containing folder
+                Type \("help".terminalColorize(.green)) to see reference for available commands.
+                """
+            
+        }
+        
+        return """
+            Specify an entry number to open its containing folder
+            Type \("help".terminalColorize(.green)) to see reference for available commands.
+            """
+        
+    }
+    
+    var acceptsCommands: Bool {
+        return true
+    }
+    
+    func executeCommand(_ input: String) throws -> Pages.PagesCommandResult {
+        
+        return processUserInputOnPages(input)
+        
+    }
+    
 }
 
 private extension String {

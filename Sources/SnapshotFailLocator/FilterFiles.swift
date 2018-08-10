@@ -20,7 +20,7 @@ func filterFiles(in repository: SnapshotRepository, with string: String) -> [Sna
     let files = repository.files
     
     let result = files.filter { snapshot in
-        let segment = snapshot.failurePath.lastPathComponent
+        let segment = snapshot.failurePath.pathComponents.suffix(2).joined(separator: "/")
         
         switch style {
         case .contains:
