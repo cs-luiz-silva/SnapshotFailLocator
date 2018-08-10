@@ -121,7 +121,18 @@ class MainMenu {
     private func processUserInputOnPages(_ input: String) -> Pages.PagesCommandResult {
         
         // Quit
-        if input.isEmpty || input.matches("quit", "q") {
+        if input.matches("quit", "q") {
+            return .quit(nil)
+        }
+        if input == "" {
+            // If a filter is active, disable it instead of quitting
+            if activeFilter != nil {
+                activeFilter = nil
+                
+                return .modifyList { pages in
+                    self.showSnapshotFiles(in: pages)
+                }
+            }
             return .quit(nil)
         }
         
@@ -280,32 +291,30 @@ class MainMenu {
 extension MainMenu: PagesCommandHandler {
     
     var commandPrompt: String? {
-        
         if let activeFilter = activeFilter {
-            
             return """
                 \("Displaying entries matching".terminalColorize(.magenta)) \(activeFilter.terminalColorize(.blue))
                 Specify an entry number to open its containing folder
                 Type \("help".terminalColorize(.green)) to see reference for available commands.
                 """
-            
         }
         
         return """
             Specify an entry number to open its containing folder
             Type \("help".terminalColorize(.green)) to see reference for available commands.
             """
-        
     }
     
     var acceptsCommands: Bool {
         return true
     }
     
+    var canHandleEmptyInput: Bool {
+        return activeFilter != nil
+    }
+    
     func executeCommand(_ input: String) throws -> Pages.PagesCommandResult {
-        
         return processUserInputOnPages(input)
-        
     }
     
 }
