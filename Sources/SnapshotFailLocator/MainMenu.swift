@@ -256,9 +256,8 @@ class MainMenu {
             Entering '0' or hitting enter with an empty text also quits the program.
 
             \("<number>".terminalColorize(.magenta))
-            = Open snapshot file
-                Insert a \("number".terminalColorize(.blue)) from the list to open the containing
-                folder for that snapshot file on Finder.
+            = Navigate to snapshot file
+                Navigates to the snapshot file at the given index using Finder.
 
             \("refresh".terminalColorize(.magenta)), \("r".terminalColorize(.magenta))
             = Refresh files
