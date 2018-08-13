@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "SnapshotFailLocator",
     dependencies: [
-        .package(url: "https://bitbucket.org/cs-luiz-silva/console.git", from: "0.2.0")
+        .package(url: "https://bitbucket.org/cs-luiz-silva/console.git", from: "0.3.0")
     ],
     targets: [
         .target(
