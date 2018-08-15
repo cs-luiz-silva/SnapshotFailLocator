@@ -93,8 +93,8 @@ class MainMenu {
             // Result: Clear filter
             activeFilter = nil
             
-            return .modifyList { pages in
-                self.showSnapshotFiles(in: pages)
+            return .modifyList { _ in
+                self.makeSnapshotPagesProvider()
             }
         }
         
@@ -111,8 +111,8 @@ class MainMenu {
             activeFilter = filter
         }
         
-        return .modifyList { pages in
-            self.showSnapshotFiles(in: pages)
+        return .modifyList { _ in
+            self.makeSnapshotPagesProvider()
         }
     }
     
@@ -129,8 +129,8 @@ class MainMenu {
             if activeFilter != nil {
                 activeFilter = nil
                 
-                return .modifyList { pages in
-                    self.showSnapshotFiles(in: pages)
+                return .modifyList { _ in
+                    self.makeSnapshotPagesProvider()
                 }
             }
             return .quit(nil)
@@ -147,7 +147,7 @@ class MainMenu {
             console.clearScreen()
             return .modifyList { pages in
                 self.locateFiles()
-                self.showSnapshotFiles(in: pages)
+                return self.makeSnapshotPagesProvider()
             }
         }
         
@@ -163,7 +163,7 @@ class MainMenu {
             if eraseAll() {
                 return .modifyList { pages in
                     self.locateFiles()
-                    self.showSnapshotFiles(in: pages)
+                    return self.makeSnapshotPagesProvider()
                 }
             }
             
@@ -191,9 +191,7 @@ class MainMenu {
     }
     
     private func showSnapshotFiles(in pages: Pages) {
-        let provider =
-            MainMenu.makeSnapshotPagesProvider(from: filteredFiles,
-                                               activeFilter: activeFilter)
+        let provider = makeSnapshotPagesProvider()
         
         pages.displayPages(withProvider: provider)
     }
@@ -206,7 +204,18 @@ class MainMenu {
         return pages
     }
     
-    private static func makeSnapshotPagesProvider(from files: [SnapshotFile], activeFilter: String?) -> AnyConsoleDataProvider<[String]> {
+    private func makeSnapshotPagesProvider() -> AnyConsoleDataProvider {
+        let provider =
+            MainMenu.makeSnapshotPagesProvider(
+                from: filteredFiles,
+                activeFilter: activeFilter)
+        
+        return provider
+    }
+    
+    private static func makeSnapshotPagesProvider(from files: [SnapshotFile],
+                                                  activeFilter: String?) -> AnyConsoleDataProvider {
+        
         let formatter = DateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .short
@@ -216,7 +225,7 @@ class MainMenu {
         let count = files.isEmpty ? 1 : files.count
         let header = "Snapshot files found - most recent first:"
         
-        let provider = AnyConsoleDataProvider<[String]>(count: count, header: header) { index in
+        let provider = AnyConsoleDataProvider(count: count, header: header) { index in
             if files.isEmpty {
                 if let activeFilter = activeFilter {
                     return [

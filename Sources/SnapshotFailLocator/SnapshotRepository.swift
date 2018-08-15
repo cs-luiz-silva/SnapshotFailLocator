@@ -16,8 +16,8 @@ class SnapshotRepository {
     func eraseFiles() throws {
         for file in files {
             try FileManager.default.removeItem(at: file.failurePath)
-            try FileManager.default.removeItem(at: file.diffPath)
-            try FileManager.default.removeItem(at: file.referencePath)
+            try? FileManager.default.removeItem(at: file.diffPath)
+            try? FileManager.default.removeItem(at: file.referencePath)
         }
         
         reloadFromDisk()

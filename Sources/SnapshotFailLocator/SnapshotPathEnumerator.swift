@@ -85,7 +85,7 @@ struct ApplicationSnaphotIterator: Sequence, IteratorProtocol {
                     continue
                 }
                 
-                // Math `reference_` and `diff_` files which are also saved on
+                // Match `reference_` and `diff_` files which are also saved on
                 // the same path as failed images
                 let referencePath
                     = file.path.replacingOccurrences(of: "failed_", with: "reference_")
