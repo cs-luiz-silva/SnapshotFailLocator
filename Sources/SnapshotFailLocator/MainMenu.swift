@@ -187,7 +187,7 @@ class MainMenu {
         
         self.browseToSnapshot(index: index)
         
-        return .loop("Opening folder \(filteredFiles[index].folder)...".terminalColorize(.magenta))
+        return .loop("Opening folder \(filteredFiles[index].folder) ...".terminalColorize(.magenta))
     }
     
     private func showSnapshotFiles(in pages: Pages) {
