@@ -12,6 +12,17 @@ class SnapshotRepository {
             }
     }
     
+    /// Erases a given file index
+    func eraseFile(index: Int) throws {
+        let file = files[index]
+        
+        try FileManager.default.removeItem(at: file.failurePath)
+        try? FileManager.default.removeItem(at: file.diffPath)
+        try? FileManager.default.removeItem(at: file.referencePath)
+        
+        reloadFromDisk()
+    }
+    
     /// Erases all files on disk, reloading the files from disk afterwards again.
     func eraseFiles() throws {
         for file in files {

@@ -55,6 +55,31 @@ class MainMenu {
                 inFileViewerRootedAtPath: (folder as NSString).deletingLastPathComponent)
     }
     
+    private func erase(index: Int) -> Bool {
+        let path = (filteredFiles[index].referencePath.absoluteString as NSString).lastPathComponent
+        
+        let prompt =
+            console
+                .readSureLineWith(prompt:
+                    "\nAre you sure you want to \("delete".terminalColorize(.red)) snapshot file \(path.terminalColorize(.blue)) and related files (yes/no)?")
+        
+        guard prompt.lowercased().matches("yes", "y") else {
+            return false
+        }
+        
+        // Erase all files
+        console.printLine("Erasing \(path.terminalColorize(.blue))...")
+        
+        do {
+            try repository.eraseFile(index: index)
+        } catch {
+            console.printLine("Error erasing file: \(error)")
+            _=console.readLineWith(prompt: "")
+        }
+        
+        return true
+    }
+    
     private func eraseAll() -> Bool {
         let prompt =
             console
@@ -76,6 +101,42 @@ class MainMenu {
         }
         
         return true
+    }
+    
+    private func processEraseAll(in input: String) -> Pages.PagesCommandResult? {
+        let split =
+            input
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .components(separatedBy: " ")
+        
+        if split.count == 1 {
+            if !split[0].matches("erase", "e") {
+                return nil
+            }
+            
+            if eraseAll() {
+                return .modifyList { pages in
+                    self.locateFiles()
+                    return self.makeSnapshotPagesProvider()
+                }
+            }
+            
+            return .loop(nil)
+        }
+        
+        let eraseIndexString = split.dropFirst().joined(separator: " ")
+        guard let eraseIndex = Int(eraseIndexString), eraseIndex >= 0 && eraseIndex < filteredFiles.count else {
+            return .loop("Invalid entry index '\(eraseIndexString)': expected an entry index from above.".terminalColorize(.red))
+        }
+        
+        if erase(index: eraseIndex - 1) {
+            return .modifyList { pages in
+                self.locateFiles()
+                return self.makeSnapshotPagesProvider()
+            }
+        }
+        
+        return .loop(nil)
     }
     
     private func processFilter(in input: String) -> Pages.PagesCommandResult? {
@@ -158,16 +219,11 @@ class MainMenu {
             }
         }
         
-        // Erase all
-        if input.matches("eraseall", "e") {
-            if eraseAll() {
-                return .modifyList { pages in
-                    self.locateFiles()
-                    return self.makeSnapshotPagesProvider()
-                }
+        // Erase/erase all
+        if input.hasPrefix("erase") || input.hasPrefix("e") {
+            if let result = processEraseAll(in: input) {
+                return result
             }
-            
-            return .loop(nil)
         }
         
         // Assume an entry integer is entered, then.
@@ -282,12 +338,14 @@ class MainMenu {
                 Supports wildcards in paths, e.g. \("'MyView*'".terminalColorize(.blue)) matches \("'MyView'".terminalColorize(.blue)),
                     \("'MyViewController'".terminalColorize(.blue)), \("'MyViewModel'".terminalColorize(.blue)), etc.
 
-            \("eraseall".terminalColorize(.magenta)), \("e".terminalColorize(.magenta))
+            \("erase [<index>]".terminalColorize(.magenta)), \("e [<index>]".terminalColorize(.magenta))
             = Delete files
-                \("Deletes".terminalColorize(.red)) all snapshot files on disk.
+                \("Deletes".terminalColorize(.red)) all snapshot files on disk, or a specific snapshot
+                from the list, in case the optional \("<index>".terminalColorize(.magenta)) is provided.
                 Prompts for confirmation beforehands.
-                Note: Does a lookup on disk prior to deletion, removing all snapshot
-                      files found while ignoring any currently active filtering.
+                Note: Does a lookup on disk prior to deletion, removing all (or one)
+                      snapshot file(s) found while ignoring any currently active
+                      filtering.
 
             \("help".terminalColorize(.magenta)), \("h".terminalColorize(.magenta))
             Displays this help prompt.
