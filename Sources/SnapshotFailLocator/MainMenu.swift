@@ -125,7 +125,7 @@ class MainMenu {
         }
         
         let eraseIndexString = split.dropFirst().joined(separator: " ")
-        guard let eraseIndex = Int(eraseIndexString), eraseIndex >= 0 && eraseIndex < filteredFiles.count else {
+        guard let eraseIndex = Int(eraseIndexString), eraseIndex > 0 && eraseIndex <= filteredFiles.count else {
             return .loop("Invalid entry index '\(eraseIndexString)': expected an entry index from above.".terminalColorize(.red))
         }
         
