@@ -4,6 +4,20 @@ import Foundation
 class SnapshotRepository {
     private(set) var files: [SnapshotFile] = []
     
+    var filteredFiles: [SnapshotFile] = []
+    
+    /// If non-nil, specifies the currently active filter working on paths of
+    /// snapshot filenames.
+    var activeFilter: String? {
+        didSet {
+            if let activeFilter = activeFilter {
+                filteredFiles = filterFiles(in: self, with: activeFilter)
+            } else {
+                filteredFiles = files
+            }
+        }
+    }
+    
     /// Initiates a reload of snapshot files from disk
     func reloadFromDisk() {
         files =

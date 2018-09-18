@@ -8,20 +8,6 @@ class MainMenu {
     var console: ConsoleClient
     var repository: SnapshotRepository
     
-    var filteredFiles: [SnapshotFile] = []
-    
-    /// If non-nil, specifies the currently active filter working on paths of
-    /// snapshot filenames.
-    var activeFilter: String? {
-        didSet {
-            if let activeFilter = activeFilter {
-                filteredFiles = filterFiles(in: repository, with: activeFilter)
-            } else {
-                filteredFiles = repository.files
-            }
-        }
-    }
-    
     init(console: ConsoleClient, repository: SnapshotRepository) {
         self.console = console
         self.repository = repository
@@ -30,29 +16,28 @@ class MainMenu {
     func run() {
         locateFiles()
         
-        let pages = makeSnapshotPages(from: filteredFiles)
+        let pages = makeSnapshotPages(from: repository.filteredFiles)
         showSnapshotFiles(in: pages)
     }
     
     func locateFiles() {
-        activeFilter = nil
+        repository.activeFilter = nil
         
         console.printLine("Locating files...")
         repository.reloadFromDisk()
-        filteredFiles = repository.files
     }
     
     // MARK: Functionalities
     
     private func browseToSnapshot(index: Int) {
-        let file = filteredFiles[index]
+        let file = repository.filteredFiles[index]
         
         NSWorkspace.shared
             .activateFileViewerSelecting([file.failurePath, file.diffPath, file.referencePath])
     }
     
     private func erase(index: Int) -> Bool {
-        let path = (filteredFiles[index].referencePath.absoluteString as NSString).lastPathComponent
+        let path = (repository.filteredFiles[index].referencePath.absoluteString as NSString).lastPathComponent
         
         let prompt =
             console
@@ -121,7 +106,7 @@ class MainMenu {
         }
         
         let eraseIndexString = split.dropFirst().joined(separator: " ")
-        guard let eraseIndex = Int(eraseIndexString), eraseIndex > 0 && eraseIndex <= filteredFiles.count else {
+        guard let eraseIndex = Int(eraseIndexString), eraseIndex > 0 && eraseIndex <= repository.filteredFiles.count else {
             return .loop("Invalid entry index '\(eraseIndexString)': expected an entry index from above.".terminalColorize(.red))
         }
         
@@ -148,7 +133,7 @@ class MainMenu {
             
             // One component only: User has input just `filter` or `f`
             // Result: Clear filter
-            activeFilter = nil
+            repository.activeFilter = nil
             
             return .modifyList { _ in
                 self.makeSnapshotPagesProvider()
@@ -157,15 +142,15 @@ class MainMenu {
         
         let filter = split.dropFirst().joined(separator: " ")
         
-        if filter == activeFilter {
+        if filter == repository.activeFilter {
             return .loop(nil)
         }
         
         if filter.isEmpty {
             // Empty string clears filters
-            activeFilter = nil
+            repository.activeFilter = nil
         } else {
-            activeFilter = filter
+            repository.activeFilter = filter
         }
         
         return .modifyList { _ in
@@ -183,8 +168,8 @@ class MainMenu {
         }
         if input == "" {
             // If a filter is active, disable it instead of quitting
-            if activeFilter != nil {
-                activeFilter = nil
+            if repository.activeFilter != nil {
+                repository.activeFilter = nil
                 
                 return .modifyList { _ in
                     self.makeSnapshotPagesProvider()
@@ -227,11 +212,11 @@ class MainMenu {
             return .loop("Invalid entry index '\(input)': expected an entry index from above.".terminalColorize(.red))
         }
         
-        if filteredFiles.isEmpty {
+        if repository.filteredFiles.isEmpty {
             return .loop("No snapshot files are available. Type 'refresh' to reload from disk now.".terminalColorize(.red))
         }
         
-        if int < 1 || int > filteredFiles.count {
+        if int < 1 || int > repository.filteredFiles.count {
             return .loop("Invalid entry index \(int): must be between 1 and \(filteredFiles.count).".terminalColorize(.red))
         }
         
@@ -239,7 +224,7 @@ class MainMenu {
         
         self.browseToSnapshot(index: index)
         
-        return .loop("Opening folder \(filteredFiles[index].folder) ...".terminalColorize(.magenta))
+        return .loop("Opening folder \(repository.filteredFiles[index].folder) ...".terminalColorize(.magenta))
     }
     
     private func showSnapshotFiles(in pages: Pages) {
@@ -259,8 +244,8 @@ class MainMenu {
     private func makeSnapshotPagesProvider() -> AnyConsoleDataProvider {
         let provider =
             MainMenu.makeSnapshotPagesProvider(
-                from: filteredFiles,
-                activeFilter: activeFilter)
+                from: repository.filteredFiles,
+                activeFilter: repository.activeFilter)
         
         return provider
     }
