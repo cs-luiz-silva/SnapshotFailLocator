@@ -47,12 +47,8 @@ class MainMenu {
     private func browseToSnapshot(index: Int) {
         let file = filteredFiles[index]
         
-        let folder = file.folder
-        
         NSWorkspace.shared
-            .selectFile(
-                file.failurePath.path,
-                inFileViewerRootedAtPath: (folder as NSString).deletingLastPathComponent)
+            .activateFileViewerSelecting([file.failurePath, file.diffPath, file.referencePath])
     }
     
     private func erase(index: Int) -> Bool {
