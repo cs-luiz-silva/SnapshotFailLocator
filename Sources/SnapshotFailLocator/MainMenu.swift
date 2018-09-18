@@ -14,14 +14,16 @@ class MainMenu {
     }
     
     func run() {
-        locateFiles()
+        locateFiles(eraseFilter: true)
         
         let pages = makeSnapshotPages(from: repository.filteredFiles)
         showSnapshotFiles(in: pages)
     }
     
-    func locateFiles() {
-        repository.activeFilter = nil
+    func locateFiles(eraseFilter: Bool) {
+        if eraseFilter {
+            repository.activeFilter = nil
+        }
         
         console.printLine("Locating files...")
         repository.reloadFromDisk()
@@ -42,14 +44,14 @@ class MainMenu {
         let prompt =
             console
                 .readSureLineWith(prompt:
-                    "\nAre you sure you want to \("delete".terminalColorize(.red)) snapshot file \(path.terminalColorize(.blue)) and related files (yes/no)?")
+                    "\nAre you sure you want to \("delete".terminalColorize(Color.destructive)) snapshot file \(path.terminalColorize(Color.fileName)) and related files (yes/no)?")
         
         guard prompt.lowercased().matches("yes", "y") else {
             return false
         }
         
         // Erase all files
-        console.printLine("Erasing \(path.terminalColorize(.blue))...")
+        console.printLine("Erasing \(path.terminalColorize(Color.fileName))...")
         
         do {
             try repository.eraseFile(index: index)
@@ -61,27 +63,54 @@ class MainMenu {
         return true
     }
     
-    private func eraseAll() -> Bool {
-        let prompt =
-            console
-                .readSureLineWith(prompt:
-                    "\nAre you sure you want to \("delete".terminalColorize(.red)) all snapshot files (yes/no)?")
+    private func eraseAll() -> Pages.PagesCommandResult {
+        if repository.filteredFiles.isEmpty {
+            return Pages.PagesCommandResult.loop("No files available to delete".terminalColorize(.blue))
+        }
         
-        guard prompt.lowercased().matches("yes", "y") else {
-            return false
+        let isFiltered: Bool
+        let prompt: String
+        
+        if let filter = repository.activeFilter {
+            isFiltered = true
+            prompt = """
+            
+            Are you sure you want to \("delete".terminalColorize(Color.destructive)) all \
+            \(repository.filteredFiles.count.description.terminalColorize(.blue)) \
+            snapshot files matching current filter \(filter.terminalColorize(Color.filterString)) (yes/no)?
+            """
+        } else {
+            isFiltered = false
+            prompt = """
+            
+            Are you sure you want to \("delete".terminalColorize(Color.destructive)) all \
+            \(repository.files.count.description.terminalColorize(.blue)) \
+            snapshot files (yes/no)?
+            """
+        }
+        
+        guard console.readSureLineWith(prompt: prompt).lowercased().matches("yes", "y") else {
+            return .loop(nil)
         }
         
         // Erase all files
         console.printLine("Erasing files...")
         
         do {
-            try repository.eraseFiles()
+            if isFiltered {
+                try repository.eraseDisplayedFiles()
+            } else {
+                try repository.eraseFiles()
+            }
         } catch {
             console.printLine("Error erasing files: \(error)")
             _=console.readLineWith(prompt: "")
         }
         
-        return true
+        return .modifyList(keepPageIndex: false) { pages in
+            self.locateFiles(eraseFilter: true)
+            return self.makeSnapshotPagesProvider()
+        }
     }
     
     private func processEraseAll(in input: String) -> Pages.PagesCommandResult? {
@@ -95,24 +124,17 @@ class MainMenu {
                 return nil
             }
             
-            if eraseAll() {
-                return .modifyList { pages in
-                    self.locateFiles()
-                    return self.makeSnapshotPagesProvider()
-                }
-            }
-            
-            return .loop(nil)
+            return eraseAll()
         }
         
         let eraseIndexString = split.dropFirst().joined(separator: " ")
         guard let eraseIndex = Int(eraseIndexString), eraseIndex > 0 && eraseIndex <= repository.filteredFiles.count else {
-            return .loop("Invalid entry index '\(eraseIndexString)': expected an entry index from above.".terminalColorize(.red))
+            return .loop("Invalid entry index '\(eraseIndexString)': expected an entry index from above.".terminalColorize(Color.destructive))
         }
         
         if erase(index: eraseIndex - 1) {
-            return .modifyList { pages in
-                self.locateFiles()
+            return .modifyList(keepPageIndex: true) { pages in
+                self.locateFiles(eraseFilter: false)
                 return self.makeSnapshotPagesProvider()
             }
         }
@@ -135,7 +157,7 @@ class MainMenu {
             // Result: Clear filter
             repository.activeFilter = nil
             
-            return .modifyList { _ in
+            return .modifyList(keepPageIndex: false) { _ in
                 self.makeSnapshotPagesProvider()
             }
         }
@@ -153,7 +175,7 @@ class MainMenu {
             repository.activeFilter = filter
         }
         
-        return .modifyList { _ in
+        return .modifyList(keepPageIndex: false) { _ in
             self.makeSnapshotPagesProvider()
         }
     }
@@ -171,7 +193,7 @@ class MainMenu {
             if repository.activeFilter != nil {
                 repository.activeFilter = nil
                 
-                return .modifyList { _ in
+                return .modifyList(keepPageIndex: false) { _ in
                     self.makeSnapshotPagesProvider()
                 }
             }
@@ -187,8 +209,8 @@ class MainMenu {
         // Refresh
         if input.matches("refresh", "r") {
             console.clearScreen()
-            return .modifyList { pages in
-                self.locateFiles()
+            return .modifyList(keepPageIndex: true) { pages in
+                self.locateFiles(eraseFilter: false)
                 return self.makeSnapshotPagesProvider()
             }
         }
@@ -209,15 +231,15 @@ class MainMenu {
         
         // Assume an entry integer is entered, then.
         guard let int = Int(input) else {
-            return .loop("Invalid entry index '\(input)': expected an entry index from above.".terminalColorize(.red))
+            return .loop("Invalid entry index '\(input)': expected an entry index from above.".terminalColorize(Color.destructive))
         }
         
         if repository.filteredFiles.isEmpty {
-            return .loop("No snapshot files are available. Type 'refresh' to reload from disk now.".terminalColorize(.red))
+            return .loop("No snapshot files are available. Type 'refresh' to reload from disk now.".terminalColorize(Color.destructive))
         }
         
         if int < 1 || int > repository.filteredFiles.count {
-            return .loop("Invalid entry index \(int): must be between 1 and \(filteredFiles.count).".terminalColorize(.red))
+            return .loop("Invalid entry index \(int): must be between 1 and \(repository.filteredFiles.count).".terminalColorize(Color.destructive))
         }
         
         let index = int - 1
@@ -266,11 +288,14 @@ class MainMenu {
             if files.isEmpty {
                 if let activeFilter = activeFilter {
                     return [
-                        "\("No snapshots found matching filter".terminalColorize(.red)) \(activeFilter.terminalColorize(.magenta))\(".".terminalColorize(.red))"
+                        """
+                        \("No snapshots found matching filter".terminalColorize(Color.destructive)) \
+                        \(activeFilter.terminalColorize(Color.filterString))\(".".terminalColorize(Color.destructive))
+                        """
                     ]
                 }
                 
-                return ["No snapshots available.".terminalColorize(.red)]
+                return ["No snapshots available.".terminalColorize(Color.destructive)]
             }
             
             let file = files[index]
@@ -280,7 +305,7 @@ class MainMenu {
                 file.failurePath.pathComponents
                     .dropLast().suffix(1)
                     .joined(separator: "/")
-                    .terminalColorize(ConsoleColor.green)
+                    .terminalColorize(.green)
             
             var columns: [String] = []
             
@@ -321,7 +346,7 @@ class MainMenu {
 
             \("erase [<index>]".terminalColorize(.magenta)), \("e [<index>]".terminalColorize(.magenta))
             = Delete files
-                \("Deletes".terminalColorize(.red)) all snapshot files on disk, or a specific snapshot
+                \("Deletes".terminalColorize(Color.destructive)) all snapshot files on disk, or a specific snapshot
                 from the list, in case the optional \("<index>".terminalColorize(.magenta)) is provided.
                 Prompts for confirmation beforehands.
                 Note: Does a lookup on disk prior to deletion, removing all (or one)
@@ -338,7 +363,7 @@ class MainMenu {
 extension MainMenu: PagesCommandHandler {
     
     var commandPrompt: String? {
-        if let activeFilter = activeFilter {
+        if let activeFilter = repository.activeFilter {
             return """
                 \("Displaying entries matching".terminalColorize(.magenta)) \(activeFilter.terminalColorize(.blue))
                 Specify an entry number to open its containing folder
@@ -357,11 +382,18 @@ extension MainMenu: PagesCommandHandler {
     }
     
     var canHandleEmptyInput: Bool {
-        return activeFilter != nil
+        return repository.activeFilter != nil
     }
     
     func executeCommand(_ input: String) throws -> Pages.PagesCommandResult {
         return processUserInputOnPages(input)
+    }
+    
+    private struct Color {
+        static let filterString: ConsoleColor = .magenta
+        static let destructive: ConsoleColor = .red
+        static let fileName: ConsoleColor = .blue
+        static let path: ConsoleColor = .magenta
     }
     
 }

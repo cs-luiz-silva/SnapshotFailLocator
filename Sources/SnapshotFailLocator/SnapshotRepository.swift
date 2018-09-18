@@ -10,11 +10,7 @@ class SnapshotRepository {
     /// snapshot filenames.
     var activeFilter: String? {
         didSet {
-            if let activeFilter = activeFilter {
-                filteredFiles = filterFiles(in: self, with: activeFilter)
-            } else {
-                filteredFiles = files
-            }
+            reloadFilteredFiles()
         }
     }
     
@@ -24,11 +20,13 @@ class SnapshotRepository {
             SnapshotPathEnumerator.enumerateSnapshotFiles().sorted {
                 $0.changeDate > $1.changeDate
             }
+        
+        reloadFilteredFiles()
     }
     
     /// Erases a given file index
     func eraseFile(index: Int) throws {
-        let file = files[index]
+        let file = filteredFiles[index]
         
         try FileManager.default.removeItem(at: file.failurePath)
         try? FileManager.default.removeItem(at: file.diffPath)
@@ -48,9 +46,29 @@ class SnapshotRepository {
         reloadFromDisk()
     }
     
+    /// Erases the files currently filtered by the active filter string
+    func eraseDisplayedFiles() throws {
+        for file in filteredFiles {
+            try FileManager.default.removeItem(at: file.failurePath)
+            try? FileManager.default.removeItem(at: file.diffPath)
+            try? FileManager.default.removeItem(at: file.referencePath)
+        }
+        
+        reloadFromDisk()
+    }
+    
     /// Clears the list of files within this repository.
     /// Does not erase any file from disk.
     func clear() {
         files = []
+        reloadFilteredFiles()
+    }
+    
+    private func reloadFilteredFiles() {
+        if let activeFilter = activeFilter {
+            filteredFiles = filterFiles(in: self, with: activeFilter)
+        } else {
+            filteredFiles = files
+        }
     }
 }
