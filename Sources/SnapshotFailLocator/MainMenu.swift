@@ -349,9 +349,8 @@ class MainMenu {
                 \("Deletes".terminalColorize(Color.destructive)) all snapshot files on disk, or a specific snapshot
                 from the list, in case the optional \("<index>".terminalColorize(.magenta)) is provided.
                 Prompts for confirmation beforehands.
-                Note: Does a lookup on disk prior to deletion, removing all (or one)
-                      snapshot file(s) found while ignoring any currently active
-                      filtering.
+                Note: Removes files based on currently active filters; removing all files will respect active filters,
+                too.
 
             \("help".terminalColorize(.magenta)), \("h".terminalColorize(.magenta))
             Displays this help prompt.
