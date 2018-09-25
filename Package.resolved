@@ -1,7 +1,15 @@
 {
   "object": {
     "pins": [
-
+      {
+        "package": "Console",
+        "repositoryURL": "https://github.com/LuizZak/console.git",
+        "state": {
+          "branch": null,
+          "revision": "a3adc9d4fbcc3f2c6add286140e02cfa66100a8e",
+          "version": "0.4.3"
+        }
+      }
     ]
   },
   "version": 1

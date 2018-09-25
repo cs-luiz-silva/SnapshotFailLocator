@@ -7,7 +7,7 @@ let package = Package(
     name: "SnapshotFailLocator",
     dependencies: [
         .package(url: "https://github.com/LuizZak/console.git",
-                 from: "0.4.2")
+                 from: "0.4.3")
     ],
     targets: [
         .target(
