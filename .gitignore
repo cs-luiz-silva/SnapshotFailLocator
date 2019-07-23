@@ -38,3 +38,4 @@ xcuserdata/
 .DS_Store
 
 # End of https://www.gitignore.io/api/xcode,swiftpackagemanager
+snapshot-paths.json

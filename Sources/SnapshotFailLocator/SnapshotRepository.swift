@@ -15,10 +15,8 @@ class SnapshotRepository {
         }
     }
 
-    init() {
-        searchPathControllers = [
-            DerivedDataSearchPathController()
-        ]
+    init(searchPathControllers: [SearchPathController]) {
+        self.searchPathControllers = searchPathControllers
     }
 
     private func loadAllFiles() -> [SnapshotFile] {
