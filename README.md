@@ -4,7 +4,7 @@ For when Snapshot fails, and you're too lazy to search for the test failure imag
 
 ### Requirements
 
-Xcode 9.2 w/ Swift 4 or later.
+Xcode 10.2 w/ Swift 5 or later.
 
 ### Running
 
