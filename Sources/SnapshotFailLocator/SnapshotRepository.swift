@@ -5,6 +5,7 @@ class SnapshotRepository {
     private(set) var files: [SnapshotFile] = []
     
     var filteredFiles: [SnapshotFile] = []
+    var searchPathControllers: [SearchPathController]
     
     /// If non-nil, specifies the currently active filter working on paths of
     /// snapshot filenames.
@@ -13,11 +14,21 @@ class SnapshotRepository {
             reloadFilteredFiles()
         }
     }
+
+    init() {
+        searchPathControllers = [
+            DerivedDataSearchPathController()
+        ]
+    }
+
+    private func loadAllFiles() -> [SnapshotFile] {
+        return searchPathControllers.flatMap { $0.enumerateSnapshotFiles() }
+    }
     
     /// Initiates a reload of snapshot files from disk
     func reloadFromDisk() {
         files =
-            SnapshotPathEnumerator.enumerateSnapshotFiles().sorted {
+            loadAllFiles().sorted {
                 $0.changeDate > $1.changeDate
             }
         
