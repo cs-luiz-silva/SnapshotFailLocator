@@ -11,7 +11,13 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "SnapshotFailLocatorLib",
+            dependencies: []),
+        .target(
             name: "SnapshotFailLocator",
-            dependencies: ["Console"]),
+            dependencies: ["SnapshotFailLocatorLib", "Console"]),
+        .testTarget(
+            name: "SnapshotFailLocatorLibTests",
+            dependencies: ["SnapshotFailLocatorLib"]),
     ]
 )

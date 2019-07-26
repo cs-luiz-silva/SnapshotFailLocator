@@ -2,18 +2,19 @@ import Foundation
 
 /// Controls access to the underlying search path list, saved as a
 /// snapshot-paths.json file at the app's launch path.
-class SearchPathListController {
-    var configFileName: String = "snapshot-paths.json"
-    var pathForConfigurationFile: URL {
-        return URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent(configFileName)
+public class SearchPathListController {
+    public var configFileName: String = "snapshot-paths.json"
+    public var directoryUrl: URL
+    public var pathForConfigurationFile: URL {
+        return directoryUrl.appendingPathComponent(configFileName)
     }
 
-    init() {
-
+    public init(directoryUrl: URL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)) {
+        self.directoryUrl = directoryUrl
     }
 
     /// Reloads search path controllers from disk
-    func loadSearchPathControllers() throws -> [SearchPathController] {
+    public func loadSearchPathControllers() throws -> [SearchPathController] {
         if !FileManager.default.fileExists(atPath: pathForConfigurationFile.path) {
             return [DerivedDataSearchPathController()]
         }

@@ -1,9 +1,13 @@
 import Foundation
 
-class DerivedDataSearchPathController: SearchPathController {
-    let name: String = "DerivedData"
+public class DerivedDataSearchPathController: SearchPathController {
+    public let name: String = "DerivedData"
 
-    func enumerateSnapshotFiles() -> AnySequence<SnapshotFile> {
+    public init() {
+        
+    }
+
+    public func enumerateSnapshotFiles() -> AnySequence<SnapshotFile> {
         let snapshots =
             DerivedDataDeviceIterator().lazy.flatMap { iterator in
                 return iterator.lazy

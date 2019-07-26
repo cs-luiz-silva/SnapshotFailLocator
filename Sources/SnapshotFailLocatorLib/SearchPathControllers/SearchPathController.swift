@@ -1,5 +1,5 @@
 /// Describes a controller for searching into paths looking for snapshot failures
-protocol SearchPathController {
+public protocol SearchPathController {
     /// A display name for this search path controller
     var name: String { get }
 

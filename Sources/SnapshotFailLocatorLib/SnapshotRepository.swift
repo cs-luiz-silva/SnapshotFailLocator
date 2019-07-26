@@ -1,22 +1,25 @@
 import Foundation
 
 /// Repository which manages refences to snapshot files found on disk.
-class SnapshotRepository {
-    private(set) var files: [SnapshotFile] = []
+public class SnapshotRepository {
+    private(set) public var files: [SnapshotFile] = []
     
-    var filteredFiles: [SnapshotFile] = []
-    var searchPathControllers: [SearchPathController]
+    private(set) public var filteredFiles: [SnapshotFile] = []
+    public let searchPathControllers: [SearchPathController]
     
     /// If non-nil, specifies the currently active filter working on paths of
     /// snapshot filenames.
-    var activeFilter: String? {
+    public var activeFilter: String? {
         didSet {
             reloadFilteredFiles()
         }
     }
 
-    init(searchPathControllers: [SearchPathController]) {
+    public var fileManager: FileManagerType
+
+    public init(searchPathControllers: [SearchPathController], fileManager: FileManagerType) {
         self.searchPathControllers = searchPathControllers
+        self.fileManager = fileManager
     }
 
     private func loadAllFiles() -> [SnapshotFile] {
@@ -24,7 +27,7 @@ class SnapshotRepository {
     }
     
     /// Initiates a reload of snapshot files from disk
-    func reloadFromDisk() {
+    public func reloadFromDisk() {
         files =
             loadAllFiles().sorted {
                 $0.changeDate > $1.changeDate
@@ -34,33 +37,33 @@ class SnapshotRepository {
     }
     
     /// Erases a given file index
-    func eraseFile(index: Int) throws {
+    public func eraseFile(index: Int) throws {
         let file = filteredFiles[index]
         
-        try FileManager.default.removeItem(at: file.failurePath)
-        try? FileManager.default.removeItem(at: file.diffPath)
-        try? FileManager.default.removeItem(at: file.referencePath)
+        try fileManager.removeItem(at: file.failurePath)
+        try? fileManager.removeItem(at: file.diffPath)
+        try? fileManager.removeItem(at: file.referencePath)
         
         reloadFromDisk()
     }
     
     /// Erases all files on disk, reloading the files from disk afterwards again.
-    func eraseFiles() throws {
+    public func eraseFiles() throws {
         for file in files {
-            try FileManager.default.removeItem(at: file.failurePath)
-            try? FileManager.default.removeItem(at: file.diffPath)
-            try? FileManager.default.removeItem(at: file.referencePath)
+            try fileManager.removeItem(at: file.failurePath)
+            try? fileManager.removeItem(at: file.diffPath)
+            try? fileManager.removeItem(at: file.referencePath)
         }
         
         reloadFromDisk()
     }
     
     /// Erases the files currently filtered by the active filter string
-    func eraseDisplayedFiles() throws {
+    public func eraseDisplayedFiles() throws {
         for file in filteredFiles {
-            try FileManager.default.removeItem(at: file.failurePath)
-            try? FileManager.default.removeItem(at: file.diffPath)
-            try? FileManager.default.removeItem(at: file.referencePath)
+            try fileManager.removeItem(at: file.failurePath)
+            try? fileManager.removeItem(at: file.diffPath)
+            try? fileManager.removeItem(at: file.referencePath)
         }
         
         reloadFromDisk()
@@ -68,7 +71,7 @@ class SnapshotRepository {
     
     /// Clears the list of files within this repository.
     /// Does not erase any file from disk.
-    func clear() {
+    public func clear() {
         files = []
         reloadFilteredFiles()
     }

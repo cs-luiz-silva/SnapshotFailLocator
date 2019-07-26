@@ -1,5 +1,6 @@
 import Foundation
 import Console
+import SnapshotFailLocatorLib
 
 func main() {
     let console = Console()
@@ -17,7 +18,8 @@ func main() {
         _ = console.readLineWith(prompt: "Press [ENTER] to continue")
     }
     
-    let repository = SnapshotRepository(searchPathControllers: searchPathControllers)
+    let repository = SnapshotRepository(searchPathControllers: searchPathControllers,
+                                        fileManager: FileManager.default)
     let mainMenu = MainMenu(console: console, repository: repository)
     
     console.startAlternativeScreenBuffer()

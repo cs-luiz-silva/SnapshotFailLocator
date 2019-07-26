@@ -1,7 +1,7 @@
 import Foundation
 
 /// Filter files in a given repository using a given match string.
-func filterFiles(in repository: SnapshotRepository, with string: String) -> [SnapshotFile] {
+public func filterFiles(in repository: SnapshotRepository, with string: String) -> [SnapshotFile] {
     enum FilterStyle {
         case contains
         case fnmatch

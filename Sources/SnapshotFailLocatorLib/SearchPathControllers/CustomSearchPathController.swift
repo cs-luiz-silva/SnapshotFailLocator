@@ -1,14 +1,14 @@
 import Foundation
 
-class CustomSearchPathController: SearchPathController {
-    var url: URL
-    var name: String { return url.path }
+public class CustomSearchPathController: SearchPathController {
+    public var url: URL
+    public var name: String { return url.path }
 
-    init(url: URL) {
+    public init(url: URL) {
         self.url = url
     }
 
-    func enumerateSnapshotFiles() -> AnySequence<SnapshotFile> {
+    public func enumerateSnapshotFiles() -> AnySequence<SnapshotFile> {
         guard let filesEnumerator =
             FileManager.default.enumerator(at: url,
                                            includingPropertiesForKeys: [.contentModificationDateKey],

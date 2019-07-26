@@ -1,6 +1,7 @@
 import Foundation
 import Cocoa
 import Console
+import SnapshotFailLocatorLib
 
 /// Manages displaying of snapshots from a snapshot repository into a paged list
 /// with support for spawning of commands from CLI input.

@@ -1,8 +1,8 @@
 import Foundation
 import Cocoa
 
-class SnapshotPathEnumerator {
-    static func enumerateSnapshotFiles() -> AnySequence<SnapshotFile> {
+public class SnapshotPathEnumerator {
+    public static func enumerateSnapshotFiles() -> AnySequence<SnapshotFile> {
         let snapshots =
             DerivedDataDeviceIterator().lazy.flatMap { iterator in
                 return iterator.lazy
@@ -12,17 +12,17 @@ class SnapshotPathEnumerator {
     }
 }
 
-struct SnaphotPathIterator: Sequence, IteratorProtocol {
+public struct SnaphotPathIterator: Sequence, IteratorProtocol {
     
     fileprivate var enumerator: FileManager.DirectoryEnumerator
     fileprivate var iterator: NSFastEnumerationIterator
     
-    init(enumerator: FileManager.DirectoryEnumerator) {
+    public init(enumerator: FileManager.DirectoryEnumerator) {
         self.enumerator = enumerator
         iterator = enumerator.makeIterator()
     }
     
-    mutating func next() -> SnapshotFile? {
+    public mutating func next() -> SnapshotFile? {
         while let file = iterator.next() as? URL {
             if !file.path.contains("failed_") || file.pathExtension != "png" {
                 continue
