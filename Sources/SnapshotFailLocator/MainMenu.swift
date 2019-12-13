@@ -339,8 +339,7 @@ class MainMenu {
             = Filter files
                 Uses a given \("<pattern>".terminalColorize(.magenta)) to filter files being displayed.
                 Inserting an empty pattern clears filters back to default again.
-                Refreshing or erasing files clears filters.
-                Erase command ignores filtering (see \("<eraseall>".terminalColorize(.magenta))).
+                Erase command respects filtering (see \("<erase>".terminalColorize(.magenta))).
                 Filtering is case-insensitive.
                 Supports wildcards in paths, e.g. \("'MyView*'".terminalColorize(.blue)) matches \("'MyView'".terminalColorize(.blue)),
                     \("'MyViewController'".terminalColorize(.blue)), \("'MyViewModel'".terminalColorize(.blue)), etc.
